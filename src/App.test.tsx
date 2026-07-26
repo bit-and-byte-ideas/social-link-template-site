@@ -1,24 +1,31 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import App from './App';
+import { render, screen } from '@testing-library/react'
+import App from './App'
+import { profile, socialLinks } from './config/profile'
 
 describe('App', () => {
-  it('renders the get started heading', () => {
-    render(<App />);
-    expect(
-      screen.getByRole('heading', { name: /get started/i }),
-    ).toBeInTheDocument();
-  });
-
-  it('increments the counter when clicked', async () => {
-    const user = userEvent.setup();
-    render(<App />);
-    const button = screen.getByRole('button', { name: /count is 0/i });
-
-    await user.click(button);
+  it('renders the streamer name and bio', () => {
+    render(<App />)
 
     expect(
-      screen.getByRole('button', { name: /count is 1/i }),
-    ).toBeInTheDocument();
-  });
-});
+      screen.getByRole('heading', { name: profile.displayName }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(profile.bio)).toBeInTheDocument()
+  })
+
+  it('renders a link for every configured platform', () => {
+    render(<App />)
+
+    for (const link of socialLinks) {
+      const anchor = screen.getByRole('link', { name: new RegExp(link.label, 'i') })
+      expect(anchor).toHaveAttribute('href', link.url)
+      expect(anchor).toHaveAttribute('target', '_blank')
+      expect(anchor).toHaveAttribute('rel', 'noopener noreferrer')
+    }
+  })
+
+  it('shows an offline status pill by default', () => {
+    render(<App />)
+
+    expect(screen.getByText(/offline/i)).toBeInTheDocument()
+  })
+})
